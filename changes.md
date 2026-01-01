@@ -1,3 +1,8 @@
+# v13.0.2
+
+## Fixed
+- Added workaround for cslol compatibility issues
+
 # v13.0.1
 
 ## Added
