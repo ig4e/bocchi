@@ -3,7 +3,6 @@ import path from 'path'
 import fs from 'fs/promises'
 import { app, BrowserWindow } from 'electron'
 import { settingsService } from './settingsService'
-import { polymorphicService, PolymorphicResult } from './polymorphicService'
 
 export class ModToolsWrapper {
   private profilesPath: string
@@ -16,7 +15,6 @@ export class ModToolsWrapper {
   private currentOperation: ChildProcess | null = null
   private applyInProgress: boolean = false
   private importedMods: string[] = [] // Track successfully imported mods for cleanup
-  private polymorphicResult: PolymorphicResult | null = null
 
   constructor() {
     const userData = app.getPath('userData')
@@ -25,9 +23,6 @@ export class ModToolsWrapper {
   }
 
   private getModToolsExePath(): string | null {
-    if (this.polymorphicResult) {
-      return this.polymorphicResult.exePath
-    }
     const toolsPath = settingsService.getModToolsPath()
     if (!toolsPath) return null
     return path.join(toolsPath, 'mod-tools.exe')
@@ -79,11 +74,11 @@ export class ModToolsWrapper {
     }
   }
 
-  private async forceKillModTools(exeName: string = 'mod-tools.exe'): Promise<void> {
+  private async forceKillModTools(): Promise<void> {
     return new Promise((resolve) => {
-      const childProcess = spawn('taskkill', ['/F', '/IM', exeName])
-      childProcess.on('close', () => {
-        console.log(`[ModToolsWrapper] Attempted to kill all ${exeName} processes.`)
+      const process = spawn('taskkill', ['/F', '/IM', 'mod-tools.exe'])
+      process.on('close', () => {
+        console.log(`[ModToolsWrapper] Attempted to kill all mod-tools.exe processes.`)
         resolve()
       })
     })
@@ -116,23 +111,9 @@ export class ModToolsWrapper {
         return
       }
 
-      const spawnOptions: any = {
-        detached: false,
-        stdio: ['pipe', 'pipe', 'pipe']
-      }
-
-      // If using polymorphic binaries, set CWD and PATH to the temp directory
-      if (this.polymorphicResult && command === this.polymorphicResult.exePath) {
-        spawnOptions.cwd = path.dirname(command)
-        spawnOptions.env = {
-          ...process.env,
-          PATH: `${path.dirname(command)}${path.delimiter}${process.env.PATH}`
-        }
-      }
-
-      const childProcess = spawn(command, args, spawnOptions)
-      this.currentOperation = childProcess
-      this.activeProcesses.push(childProcess)
+      const process = spawn(command, args)
+      this.currentOperation = process
+      this.activeProcesses.push(process)
 
       let stdout = ''
       let stderr = ''
@@ -140,8 +121,8 @@ export class ModToolsWrapper {
 
       const timer = setTimeout(() => {
         if (!cancelled) {
-          childProcess.kill()
-          this.cleanupProcess(childProcess)
+          process.kill()
+          this.cleanupProcess(process)
           this.currentOperation = null
           const timeoutSeconds = Math.round(timeout / 1000)
           reject(new Error(`Process timed out after ${timeoutSeconds} seconds`))
@@ -154,14 +135,14 @@ export class ModToolsWrapper {
           cancelled = true
           clearInterval(cancellationChecker)
           clearTimeout(timer)
-          childProcess.kill()
-          this.cleanupProcess(childProcess)
+          process.kill()
+          this.cleanupProcess(process)
           this.currentOperation = null
           reject(new Error('Operation cancelled by user'))
         }
       }, 100) // Check every 100ms
 
-      childProcess.stdout.on('data', (data) => {
+      process.stdout.on('data', (data) => {
         const output = data.toString()
         stdout += output
 
@@ -176,7 +157,7 @@ export class ModToolsWrapper {
         }
       })
 
-      childProcess.stderr.on('data', (data) => {
+      process.stderr.on('data', (data) => {
         const output = data.toString()
         stderr += output
 
@@ -193,10 +174,10 @@ export class ModToolsWrapper {
         }
       })
 
-      childProcess.on('close', (code) => {
+      process.on('close', (code) => {
         clearTimeout(timer)
         clearInterval(cancellationChecker)
-        this.cleanupProcess(childProcess)
+        this.cleanupProcess(process)
         this.currentOperation = null
 
         if (cancelled) {
@@ -208,10 +189,10 @@ export class ModToolsWrapper {
         }
       })
 
-      childProcess.on('error', (err) => {
+      process.on('error', (err) => {
         clearTimeout(timer)
         clearInterval(cancellationChecker)
-        this.cleanupProcess(childProcess)
+        this.cleanupProcess(process)
         this.currentOperation = null
         reject(err)
       })
@@ -227,14 +208,6 @@ export class ModToolsWrapper {
       const toolsExist = await this.checkModToolsExist()
       if (!toolsExist) {
         return { success: false, message: 'CS:LOL tools not found. Please download them first.' }
-      }
-
-      // Prepare polymorphic binaries
-      const toolsPath = settingsService.getModToolsPath()
-      if (toolsPath) {
-        console.info('[ModToolsWrapper] Preparing polymorphic binaries...')
-        this.polymorphicResult = await polymorphicService.preparePolymorphicBinaries(toolsPath)
-        console.info(`[ModToolsWrapper] Polymorphic binaries ready at: ${this.polymorphicResult.tempDir}`)
       }
 
       await this.stopOverlay()
@@ -565,27 +538,17 @@ export class ModToolsWrapper {
       }
 
       console.info('[ModToolsWrapper] Starting runoverlay process...')
-      if (this.polymorphicResult) {
-        this.runningProcess = polymorphicService.spawnPolymorphicProcess(modToolsPath, [
+      this.runningProcess = spawn(
+        modToolsPath,
+        [
           'runoverlay',
           path.normalize(profilePath),
           path.normalize(profileConfigPath),
           `--game:${path.normalize(preset.gamePath)}`,
           '--opts:none'
-        ])
-      } else {
-        this.runningProcess = spawn(
-          modToolsPath,
-          [
-            'runoverlay',
-            path.normalize(profilePath),
-            path.normalize(profileConfigPath),
-            `--game:${path.normalize(preset.gamePath)}`,
-            '--opts:none'
-          ],
-          { detached: false, stdio: ['pipe', 'pipe', 'pipe'] }
-        )
-      }
+        ],
+        { detached: false, stdio: ['pipe', 'pipe', 'pipe'] }
+      )
       this.activeProcesses.push(this.runningProcess)
 
       this.runningProcess.stdout?.on('data', (data) => {
@@ -641,13 +604,6 @@ export class ModToolsWrapper {
       console.error('Failed to apply preset:', error)
       this.applyInProgress = false
 
-      // Cleanup polymorphic binaries on error if they were created but no process is running
-      if (this.polymorphicResult && !this.runningProcess) {
-        console.info('[ModToolsWrapper] Cleaning up polymorphic binaries after error...')
-        await polymorphicService.cleanup(this.polymorphicResult.tempDir).catch(() => {})
-        this.polymorphicResult = null
-      }
-
       // Send cancellation status to renderer if cancelled
       if (this.isCancelled && this.mainWindow && !this.mainWindow.isDestroyed()) {
         this.mainWindow.webContents.send('apply-cancelled')
@@ -674,19 +630,7 @@ export class ModToolsWrapper {
       }
       this.runningProcess = null
     }
-
-    if (this.polymorphicResult) {
-      await this.forceKillModTools(path.basename(this.polymorphicResult.exePath))
-    } else {
-      await this.forceKillModTools()
-    }
-
-    // Cleanup polymorphic binaries
-    if (this.polymorphicResult) {
-      console.info('[ModToolsWrapper] Cleaning up polymorphic binaries...')
-      await polymorphicService.cleanup(this.polymorphicResult.tempDir)
-      this.polymorphicResult = null
-    }
+    await this.forceKillModTools()
   }
 
   isRunning(): boolean {
@@ -798,19 +742,15 @@ export class ModToolsWrapper {
     }
 
     // Kill all active processes
-    for (const proc of this.activeProcesses) {
-      if (!proc.killed) {
-        proc.kill()
+    for (const process of this.activeProcesses) {
+      if (!process.killed) {
+        process.kill()
       }
     }
     this.activeProcesses = []
 
     // Force kill all mod-tools processes
-    if (this.polymorphicResult) {
-      await this.forceKillModTools(path.basename(this.polymorphicResult.exePath))
-    } else {
-      await this.forceKillModTools()
-    }
+    await this.forceKillModTools()
 
     // Optionally cleanup partially imported mods
     if (this.importedMods.length > 0) {

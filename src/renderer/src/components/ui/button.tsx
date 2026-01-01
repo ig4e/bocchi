@@ -12,12 +12,12 @@ const buttonVariants = cva(
         destructive:
           'bg-red-600 text-white shadow-soft hover:bg-red-700 hover:shadow-medium active:scale-[0.98]',
         outline:
-          'border border-border/50 bg-transparent hover:bg-secondary-50/50 dark:hover:bg-secondary-900/50 text-text-primary backdrop-blur-sm',
+          'border border-border bg-transparent hover:bg-secondary-50 dark:hover:bg-secondary-900 text-text-primary',
         secondary:
-          'bg-surface/50 text-text-primary shadow-soft hover:shadow-medium dark:shadow-dark-soft dark:hover:shadow-dark-medium active:scale-[0.98] backdrop-blur-sm border border-border/30',
-        ghost: 'text-text-primary hover:bg-secondary-100/50 dark:hover:bg-secondary-800/50',
+          'bg-surface text-text-primary shadow-soft hover:shadow-medium dark:shadow-dark-soft dark:hover:shadow-dark-medium active:scale-[0.98]',
+        ghost: 'text-text-primary hover:bg-secondary-100 dark:hover:bg-secondary-800',
         link: 'text-primary-500 dark:text-primary-400 underline-offset-4 hover:underline',
-        warm: 'bg-secondary-300/50 dark:bg-secondary-700/50 text-text-primary hover:bg-secondary-400/50 dark:hover:bg-secondary-600/50 active:scale-[0.98] backdrop-blur-sm'
+        warm: 'bg-secondary-300 dark:bg-secondary-700 text-text-primary hover:bg-secondary-400 dark:hover:bg-secondary-600 active:scale-[0.98]'
       },
       size: {
         default: 'h-10 px-5 py-2 text-sm',
