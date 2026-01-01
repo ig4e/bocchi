@@ -647,7 +647,7 @@ export function SettingsDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[650px] p-0 overflow-hidden border-none bg-background/95 backdrop-blur-md">
+      <DialogContent className="sm:max-w-[650px] p-0 overflow-hidden border border-white/10 bg-surface/40 backdrop-blur-xl shadow-2xl">
         <div className="relative h-32 bg-gradient-to-br from-primary-600/20 via-primary-500/10 to-transparent p-6 flex flex-col justify-end border-b border-border/50">
           <div className="absolute top-6 right-6 opacity-10">
             <Settings className="w-24 h-24 rotate-12" />
