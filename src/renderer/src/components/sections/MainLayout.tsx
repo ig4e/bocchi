@@ -2,10 +2,11 @@ import { useRef, useCallback, useEffect, ReactNode } from 'react'
 import { useSetAtom } from 'jotai'
 import { isDraggingAtom } from '../../store/atoms/ui.atoms'
 import { useStyles } from '../../hooks/useOptimizedState'
+import type { FileUploadButtonRef } from '../FileUploadButton'
 
 interface MainLayoutProps {
   children: ReactNode
-  fileUploadRef: React.MutableRefObject<any>
+  fileUploadRef: React.RefObject<FileUploadButtonRef | null>
 }
 
 export function MainLayout({ children, fileUploadRef }: MainLayoutProps) {

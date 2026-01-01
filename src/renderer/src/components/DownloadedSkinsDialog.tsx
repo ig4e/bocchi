@@ -5,28 +5,14 @@ import { Input } from './ui/input'
 import { Badge } from './ui/badge'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog'
 import { getChampionDisplayName } from '../utils/championUtils'
+import type { DownloadedSkin } from '../store/atoms/skin.atoms'
+import type { ChampionData } from '../store/atoms/champion.atoms'
 
 interface DownloadedSkinsDialogProps {
   isOpen: boolean
   onClose: () => void
-  downloadedSkins: Array<{
-    championName: string
-    skinName: string
-    localPath?: string
-    source?: 'repository' | 'user' | 'p2p'
-    metadata?: {
-      commitSha: string
-      downloadedAt: Date
-      lastUpdateCheck?: Date
-      fileSize?: number
-      githubPath?: string
-      version?: number
-    }
-    url?: string
-  }>
-  championData?: {
-    champions: Array<{ key: string; name: string; nameEn?: string; [key: string]: any }>
-  }
+  downloadedSkins: DownloadedSkin[]
+  championData?: ChampionData
   onDeleteSkin: (championName: string, skinName: string) => Promise<void>
   onDeleteCustomSkin?: (skinPath: string, skinName: string) => Promise<void>
   onRefresh: () => Promise<void>
@@ -231,7 +217,7 @@ export const DownloadedSkinsDialog: React.FC<DownloadedSkinsDialogProps> = ({
     }
   }
 
-  const handleUpdateSkin = async (skin: any) => {
+  const handleUpdateSkin = async (skin: DownloadedSkin) => {
     const key = `${skin.championName}_${skin.skinName}`
     setUpdatingSkins((prev) => new Set(prev).add(key))
 

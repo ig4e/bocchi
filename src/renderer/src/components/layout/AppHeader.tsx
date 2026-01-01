@@ -33,49 +33,53 @@ export const AppHeader = memo(() => {
   const loading = isLoadingChampionData
 
   return (
-    <div className="flex items-center justify-between px-8 py-5 bg-surface border-b-2 border-border shadow-sm dark:shadow-none">
-      <div className="flex items-center gap-3 flex-1">
-        <div className="flex items-center gap-2 flex-1 max-w-md">
-          <input
-            type="text"
-            value={gamePath}
-            placeholder="Game path not set"
-            readOnly
-            className="flex-1 px-4 py-2.5 text-sm bg-elevated border border-border rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
-          />
+    <div className="flex items-center justify-between px-8 py-6 bg-background/50 backdrop-blur-sm border-b border-border/40 shadow-sm relative z-40">
+      <div className="flex items-center gap-4 flex-1">
+        <div className="flex items-center gap-2 flex-1 max-w-md group">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              value={gamePath}
+              placeholder="Game path not set"
+              readOnly
+              className="w-full pl-4 pr-10 py-2.5 text-sm bg-surface/50 border border-border/50 rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/50 transition-all duration-300"
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className={`w-2 h-2 rounded-full ${gamePath ? 'bg-success' : 'bg-warning'} shadow-sm`} />
+            </div>
+          </div>
           <button
-            className="px-4 py-2.5 text-sm bg-surface hover:bg-secondary-100 dark:hover:bg-secondary-800 text-text-primary font-medium rounded-lg transition-all duration-200 border border-border hover:border-border-strong shadow-sm hover:shadow-md dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 text-sm bg-surface hover:bg-primary-500/10 text-text-primary hover:text-primary-500 font-bold rounded-xl transition-all duration-300 border border-border/50 hover:border-primary-500/30 shadow-sm active:scale-95 disabled:opacity-50"
             onClick={browseForGame}
             disabled={loading}
           >
             {t('actions.browse')}
           </button>
         </div>
+        <div className="h-8 w-[1px] bg-border/30 mx-2" />
+
         <button
-          className={`px-4 py-2.5 text-sm rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium
+          className={`px-5 py-2.5 text-sm rounded-xl transition-all duration-300 disabled:opacity-50 flex items-center gap-2.5 font-bold shadow-sm active:scale-95
             ${
               showFavoritesOnly
-                ? 'bg-error/10 text-error hover:bg-error/20 border-2 border-error/30'
-                : 'bg-surface text-text-primary hover:bg-secondary-100 dark:hover:bg-secondary-800 border border-border shadow-sm hover:shadow-md dark:shadow-none'
+                ? 'bg-error/10 text-error border border-error/20'
+                : 'bg-surface text-text-primary hover:bg-error/5 hover:text-error border border-border/50 hover:border-error/20'
             }`}
           onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
           disabled={loading}
           aria-pressed={showFavoritesOnly}
-          aria-label={t('nav.favorites')}
         >
           <Heart
             className={`w-4 h-4 ${
-              showFavoritesOnly ? 'text-error fill-error' : 'text-text-secondary'
-            } transition-colors`}
-            aria-hidden="true"
-            strokeWidth={showFavoritesOnly ? 2.5 : 2}
-            fill={showFavoritesOnly ? 'currentColor' : 'none'}
+              showFavoritesOnly ? 'fill-error' : 'fill-none'
+            } transition-all duration-300`}
+            strokeWidth={2.5}
           />
           {t('nav.favorites')}
         </button>
         {!championData && (
           <button
-            className="px-5 py-2.5 text-sm bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-all duration-200 shadow-soft hover:shadow-medium dark:shadow-dark-soft disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+            className="px-6 py-2.5 text-sm bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-primary-500/20 active:scale-95 disabled:opacity-50"
             onClick={fetchChampionData}
             disabled={loading}
           >
@@ -88,11 +92,11 @@ export const AppHeader = memo(() => {
           enabled={leagueClientEnabled && championDetectionEnabled}
         />
         <button
-          className="px-3 py-2.5 text-sm bg-surface hover:bg-secondary-100 dark:hover:bg-secondary-800 text-text-primary font-medium rounded-lg transition-all duration-200 border border-border hover:border-border-strong shadow-sm hover:shadow-md dark:shadow-none flex items-center gap-2"
+          className="p-2.5 bg-surface hover:bg-primary-500/10 text-text-secondary hover:text-primary-500 rounded-xl transition-all duration-300 border border-border/50 hover:border-primary-500/30 shadow-sm active:scale-95"
           onClick={() => setShowSettingsDialog(true)}
           title={t('settings.title')}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

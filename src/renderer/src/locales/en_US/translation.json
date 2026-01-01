@@ -304,7 +304,23 @@
     "tabs": {
       "general": "General",
       "leagueClient": "League Client",
-      "skinManagement": "Skin Management"
+      "skinManagement": "Skin Management",
+      "cslol": "CSLoL"
+    },
+    "cslol": {
+      "title": "CSLoL Tools",
+      "description": "Manage the CSLoL tools used for applying skins",
+      "currentVersion": "Current Version",
+      "latestVersion": "Latest Version",
+      "updateAvailable": "Update Available",
+      "upToDate": "Up to Date",
+      "update": "Update Tools",
+      "setVersion": "Set Version Manually",
+      "versionPlaceholder": "e.g. v1.0.0",
+      "saveVersion": "Save",
+      "versionSaved": "Version saved successfully",
+      "versionSaveError": "Failed to save version",
+      "versionHint": "Manually setting the version will override the current version info."
     },
     "randomSkinSelection": {
       "title": "Random Skin Selection",

@@ -14,7 +14,10 @@ export interface SelectedSkin {
   variantId?: string
   isDownloaded?: boolean
   isAutoSelected?: boolean
+  isCustom?: boolean
+  localPath?: string
   downloadedFilename?: string
+  source?: 'repository' | 'user' | 'p2p' | 'auto' | 'overlay'
 }
 
 export interface AutoSyncedSkin extends SelectedSkin {

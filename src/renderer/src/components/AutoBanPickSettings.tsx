@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAtom } from 'jotai'
+import type { LCUChampion } from '../../../main/types/preload.types'
 import { Switch } from './ui/switch'
 import { ChampionSelector } from './ChampionSelector'
 import {
@@ -30,8 +31,8 @@ export function AutoBanPickSettings({ disabled = false }: AutoBanPickSettingsPro
   const [autoBanChampions, setAutoBanChampions] = useAtom(autoBanChampionsAtom)
 
   // Champion lists
-  const [ownedChampions, setOwnedChampions] = useState<any[]>([])
-  const [allChampions, setAllChampions] = useState<any[]>([])
+  const [ownedChampions, setOwnedChampions] = useState<LCUChampion[]>([])
+  const [allChampions, setAllChampions] = useState<LCUChampion[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -44,14 +45,14 @@ export function AutoBanPickSettings({ disabled = false }: AutoBanPickSettingsPro
       const ownedResult = await window.api.lcuGetOwnedChampions()
       if (ownedResult.success && ownedResult.champions) {
         setOwnedChampions(
-          ownedResult.champions.sort((a: any, b: any) => a.name.localeCompare(b.name))
+          ownedResult.champions.sort((a: LCUChampion, b: LCUChampion) => a.name.localeCompare(b.name))
         )
       }
 
       // Load all champions for ban selection
       const allResult = await window.api.lcuGetAllChampions()
       if (allResult.success && allResult.champions) {
-        setAllChampions(allResult.champions.sort((a: any, b: any) => a.name.localeCompare(b.name)))
+        setAllChampions(allResult.champions.sort((a: LCUChampion, b: LCUChampion) => a.name.localeCompare(b.name)))
       }
     } catch (error) {
       console.error('Failed to load champions:', error)

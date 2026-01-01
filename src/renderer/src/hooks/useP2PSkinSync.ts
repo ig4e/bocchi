@@ -2,10 +2,9 @@ import { useEffect } from 'react'
 import { useAtom } from 'jotai'
 import { selectedSkinsAtom, p2pRoomAtom } from '../store/atoms'
 import { useP2P } from '../contexts/P2PContext'
+import type { DownloadedSkin } from '../store/atoms/skin.atoms'
 
-export const useP2PSkinSync = (
-  downloadedSkins: Array<{ championName: string; skinName: string; localPath?: string }>
-) => {
+export const useP2PSkinSync = (downloadedSkins: DownloadedSkin[]) => {
   const [selectedSkins] = useAtom(selectedSkinsAtom)
   const [p2pRoom] = useAtom(p2pRoomAtom)
   const { broadcastSkins } = useP2P()

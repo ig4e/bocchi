@@ -44,7 +44,15 @@ import { selectedChampionAtom } from './store/atoms/champion.atoms'
 import { editingCustomSkinAtom, showEditDialogAtom } from './store/atoms/ui.atoms'
 import { appStateSelector, lcuStateSelector } from './store/atoms/selectors.atoms'
 import { championDetectionEnabledAtom } from './store/atoms/settings.atoms'
-import { selectedChampionKeyAtom, showFavoritesOnlyAtom, skinSearchQueryAtom } from './store/atoms'
+import {
+  selectedChampionKeyAtom,
+  showFavoritesOnlyAtom,
+  skinSearchQueryAtom,
+  isSameSkin,
+  SelectedSkin
+} from './store/atoms'
+import { DownloadedSkin } from './store/atoms/skin.atoms'
+import { FileUploadButtonRef } from './components/FileUploadButton'
 
 // Types
 export interface Champion {
@@ -135,7 +143,7 @@ function AppContent(): React.JSX.Element {
   const { autoSyncedSkins } = useP2PChampionSync({ downloadedSkins })
 
   // Refs
-  const fileUploadRef = useRef<any>(null)
+  const fileUploadRef = useRef<FileUploadButtonRef>(null)
 
   // Handle champion navigation
   const navigateToChampion = useCallback(
@@ -184,7 +192,7 @@ function AppContent(): React.JSX.Element {
       let availableSkins = champion.skins.filter((skin) => skin.num !== 0)
 
       // Fetch custom skins for this champion (only for modes that support them)
-      let customSkins: any[] = []
+      let customSkins: DownloadedSkin[] = []
       const isStatBasedMode =
         autoRandomRaritySkinEnabled ||
         autoRandomHighestWinRateSkinEnabled ||
@@ -196,7 +204,7 @@ function AppContent(): React.JSX.Element {
           const downloadedSkinsResult = await window.api.listDownloadedSkins()
           if (downloadedSkinsResult.success && downloadedSkinsResult.skins) {
             // Filter for custom skins (source: 'user') that match this champion
-            customSkins = downloadedSkinsResult.skins.filter((skin: any) => {
+            customSkins = downloadedSkinsResult.skins.filter((skin: DownloadedSkin) => {
               // Check if it's a user-imported skin
               if (skin.source !== 'user') return false
 
@@ -223,7 +231,7 @@ function AppContent(): React.JSX.Element {
 
       const favoriteChromaOptions: Array<{
         skin?: Skin
-        customSkin?: any
+        customSkin?: DownloadedSkin
         chromaId?: string
         chromaName?: string
       }> = []
@@ -250,7 +258,7 @@ function AppContent(): React.JSX.Element {
           // Check if it's a custom skin favorite (skinId starts with 'custom_')
           if (fav.skinId.startsWith('custom_')) {
             // Find the custom skin in our list
-            const customSkin = customSkins.find((cs: any) => {
+            const customSkin = customSkins.find((cs: DownloadedSkin) => {
               // The custom skin ID format is: custom_[User] skinName or custom_skinName
               // We need to match the skinName part from the favorite
               const favSkinName = fav.skinId.replace('custom_', '')
@@ -371,7 +379,7 @@ function AppContent(): React.JSX.Element {
       let allAvailableOptions: Array<{
         type: 'official' | 'custom'
         skin?: Skin
-        customSkin?: any
+        customSkin?: DownloadedSkin
       }> = []
 
       if (!isStatBasedMode && !autoRandomFavoriteSkinEnabled) {
@@ -395,7 +403,7 @@ function AppContent(): React.JSX.Element {
 
       // Select a random skin or chroma
       let randomSkin: Skin | undefined
-      let randomCustomSkin: any | undefined
+      let randomCustomSkin: DownloadedSkin | undefined
       let selectedChromaId: string | undefined
       let isCustomSkinSelected = false
 
@@ -427,7 +435,7 @@ function AppContent(): React.JSX.Element {
         const randomOption =
           allAvailableOptions[Math.floor(Math.random() * allAvailableOptions.length)]
 
-        if (randomOption.type === 'custom') {
+        if (randomOption.type === 'custom' && randomOption.customSkin) {
           randomCustomSkin = randomOption.customSkin
           isCustomSkinSelected = true
           console.log(`[AutoSelect] Selected random custom skin:`, {
@@ -452,7 +460,7 @@ function AppContent(): React.JSX.Element {
       }
 
       // Add the auto-selected skin
-      let newSelectedSkin: any
+      let newSelectedSkin: SelectedSkin
 
       if (isCustomSkinSelected && randomCustomSkin) {
         // Create a selected skin object for custom skin
@@ -468,7 +476,8 @@ function AppContent(): React.JSX.Element {
           isDownloaded: true, // Custom skins are already downloaded
           isAutoSelected: true,
           isCustom: true,
-          localPath: randomCustomSkin.localPath
+          localPath: randomCustomSkin.localPath,
+          source: 'auto'
         }
         console.log(`[AutoSelect] Created custom skin selection:`, newSelectedSkin)
       } else if (randomSkin) {
@@ -484,7 +493,8 @@ function AppContent(): React.JSX.Element {
           skinNum: randomSkin.num,
           chromaId: selectedChromaId,
           isDownloaded: false,
-          isAutoSelected: true
+          isAutoSelected: true,
+          source: 'auto'
         }
         console.log(`[AutoFavorite] Created newSelectedSkin:`, newSelectedSkin)
       } else {
@@ -619,7 +629,7 @@ function AppContent(): React.JSX.Element {
             )
           }
         }
-      } else if (isCustomSkinSelected) {
+      } else if (isCustomSkinSelected && randomCustomSkin) {
         // Custom skin is already downloaded, no pre-download needed
         console.log(
           `[AutoSelect] Custom skin already available locally: ${randomCustomSkin.skinName}`
@@ -638,18 +648,13 @@ function AppContent(): React.JSX.Element {
 
   // Handle overlay skin selection
   useEffect(() => {
-    const handleOverlaySkinSelected = (_event: any, skin: any) => {
+    const handleOverlaySkinSelected = (_event: unknown, skin: SelectedSkin) => {
       // Check if skin is already selected
-      const existingIndex = selectedSkins.findIndex(
-        (s) =>
-          s.championKey === skin.championKey &&
-          s.skinId === skin.skinId &&
-          s.chromaId === skin.chromaId
-      )
+      const existingIndex = selectedSkins.findIndex((s) => isSameSkin(s, skin))
 
       if (existingIndex === -1) {
         // Add to selected skins
-        setSelectedSkins((prev) => [...prev, skin])
+        setSelectedSkins((prev) => [...prev, { ...skin, source: 'overlay' }])
         setStatusMessage(t('status.skinAddedFromOverlay', { name: skin.skinName }))
       }
     }
@@ -742,21 +747,23 @@ function AppContent(): React.JSX.Element {
       }
 
       // Check for existing selection
-      const existingIndex = selectedSkins.findIndex((s) => {
-        return (
-          s.championKey === champion.key &&
-          s.skinId === skin.id &&
-          s.chromaId === (chromaId || undefined) &&
-          s.variantId === (variantId || undefined)
-        )
-      })
+      const existingIndex = selectedSkins.findIndex((s) =>
+        isSameSkin(s, {
+          championKey: champion.key,
+          skinId: skin.id,
+          chromaId: chromaId,
+          variantId: variantId,
+          skinNum: skin.num,
+          championName: champion.name
+        })
+      )
 
       if (existingIndex >= 0) {
         // Remove from selection
         setSelectedSkins((prev) => prev.filter((_, index) => index !== existingIndex))
       } else {
         // Add to selection
-        const newSelectedSkin = {
+        const newSelectedSkin: SelectedSkin = {
           championKey: champion.key,
           championName: champion.name,
           championId: champion.id, // Store numeric ID for ID-based repositories
@@ -769,7 +776,8 @@ function AppContent(): React.JSX.Element {
           chromaId: chromaId,
           variantId: variantId,
           isDownloaded: false,
-          isAutoSelected: false
+          isAutoSelected: false,
+          source: 'repository'
         }
         setSelectedSkins((prev) => [...prev, newSelectedSkin])
       }

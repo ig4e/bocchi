@@ -20,6 +20,17 @@ export interface ToolsError {
   statusCode?: number
 }
 
+interface GitHubAsset {
+  name: string
+  browser_download_url: string
+  size: number
+}
+
+interface GitHubRelease {
+  tag_name: string
+  assets: GitHubAsset[]
+}
+
 export class ToolsDownloader {
   private multiRitoFixesPath: string
   private multiRitoFixesVersionPath: string
@@ -61,7 +72,7 @@ export class ToolsDownloader {
     }
   }
 
-  async getLatestReleaseInfo(): Promise<{
+  async getReleaseInfo(version?: string): Promise<{
     downloadUrl: string
     version: string
     size: number
@@ -69,26 +80,27 @@ export class ToolsDownloader {
     fileName: string
   }> {
     try {
-      const response = await axios.get(
-        'https://api.github.com/repos/LeagueToolkit/cslol-manager/releases/latest',
-        {
-          headers: {
-            Accept: 'application/vnd.github.v3+json'
-          },
-          timeout: 10000 // 10 second timeout
-        }
-      )
+      const url = version 
+        ? `https://api.github.com/repos/LeagueToolkit/cslol-manager/releases/tags/${version}`
+        : 'https://api.github.com/repos/LeagueToolkit/cslol-manager/releases/latest'
 
-      const release = response.data
+      const response = await axios.get(url, {
+        headers: {
+          Accept: 'application/vnd.github.v3+json'
+        },
+        timeout: 10000 // 10 second timeout
+      })
+
+      const release = response.data as GitHubRelease
 
       // First try to find .zip (old releases)
-      let asset = release.assets.find((a: any) => a.name === 'cslol-manager.zip')
+      let asset = release.assets.find((a: GitHubAsset) => a.name === 'cslol-manager.zip')
       let fileType: 'zip' | 'exe' = 'zip'
       let fileName = 'cslol-manager.zip'
 
       // Fall back to .exe (new releases)
       if (!asset) {
-        asset = release.assets.find((a: any) => a.name === 'cslol-manager-windows.exe')
+        asset = release.assets.find((a: GitHubAsset) => a.name === 'cslol-manager-windows.exe')
         fileType = 'exe'
         fileName = 'cslol-manager-windows.exe'
       }
@@ -118,11 +130,12 @@ export class ToolsDownloader {
   }
 
   async downloadAndExtractTools(
+    version?: string,
     onProgress?: (progress: number, details?: DownloadProgress) => void
   ): Promise<void> {
     let tempDir: string | undefined
     try {
-      const { downloadUrl, size, version, fileType, fileName } = await this.getLatestReleaseInfo()
+      const { downloadUrl, size, version: releaseVersion, fileType, fileName } = await this.getReleaseInfo(version)
 
       // Create temp directory
       tempDir = path.join(app.getPath('temp'), 'cslol-download')
@@ -326,7 +339,7 @@ export class ToolsDownloader {
       settingsService.setModToolsPath(targetPath)
 
       // Save version info
-      await fs.promises.writeFile(this.cslolToolsVersionPath, version)
+      await fs.promises.writeFile(this.cslolToolsVersionPath, releaseVersion)
 
       // Clean up temp files
       await fs.promises.rm(tempDir, { recursive: true, force: true })
@@ -376,6 +389,10 @@ export class ToolsDownloader {
     }
   }
 
+  async setCslolToolsVersion(version: string): Promise<void> {
+    await fs.promises.writeFile(this.cslolToolsVersionPath, version)
+  }
+
   async checkCslolToolsUpdate(): Promise<{
     updateAvailable: boolean
     currentVersion: string | null
@@ -383,7 +400,7 @@ export class ToolsDownloader {
   }> {
     try {
       const currentVersion = await this.getCslolToolsVersion()
-      const { version: latestVersion } = await this.getLatestReleaseInfo()
+      const { version: latestVersion } = await this.getReleaseInfo()
 
       // If no version file exists, assume old version and recommend update
       if (!currentVersion) {
@@ -432,10 +449,10 @@ export class ToolsDownloader {
         }
       )
 
-      const release = response.data
+      const release = response.data as GitHubRelease
       // Find the executable asset (e.g., MultiRitoFixes-v25.13.exe)
       const asset = release.assets.find(
-        (a: any) => a.name.startsWith('MultiRitoFixes-v') && a.name.endsWith('.exe')
+        (a: GitHubAsset) => a.name.startsWith('MultiRitoFixes-v') && a.name.endsWith('.exe')
       )
 
       if (!asset) {
@@ -536,9 +553,9 @@ export class ToolsDownloader {
         }
       )
 
-      const release = response.data
+      const release = response.data as GitHubRelease
       // Find the tex2dds.exe asset
-      const asset = release.assets.find((a: any) => a.name === 'tex2dds.exe')
+      const asset = release.assets.find((a: GitHubAsset) => a.name === 'tex2dds.exe')
 
       if (!asset) {
         throw new Error('Could not find tex2dds.exe in Ritoddstex release')

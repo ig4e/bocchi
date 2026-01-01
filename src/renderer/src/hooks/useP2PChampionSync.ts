@@ -6,6 +6,13 @@ import { championDetectionEnabledAtom, p2pAutoSyncEnabledAtom } from '../store/a
 import { p2pService } from '../services/p2pService'
 import type { AutoSyncedSkin, SelectedSkin } from '../store/atoms'
 
+interface PeerChampionData {
+  id: number
+  key: string
+  name: string
+  isLocked: boolean
+}
+
 interface UseP2PChampionSyncProps {
   downloadedSkins: Array<{ championName: string; skinName: string; localPath?: string }>
   enabled?: boolean
@@ -46,7 +53,7 @@ export const useP2PChampionSync = ({
 
   // Handle peer champion selection and auto-sync their skins
   const handlePeerChampionSelected = useCallback(
-    ({ peerId, championData }: { peerId: string; championData: any }) => {
+    ({ peerId, championData }: { peerId: string; championData: PeerChampionData }) => {
       if (!enabled || !championDetectionEnabled || !p2pAutoSyncEnabled) return
 
       // Find the peer in the room

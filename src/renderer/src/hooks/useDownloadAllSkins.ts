@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useChampionData } from './useChampionData'
 
-interface DownloadProgress {
+export interface DownloadProgress {
   totalSkins: number
   completedSkins: number
   currentSkin: string | null
@@ -11,6 +11,9 @@ interface DownloadProgress {
   failedSkins: string[]
   isRunning: boolean
   isPaused: boolean
+  phase?: 'downloading' | 'extracting' | 'processing' | 'completed'
+  overallProgress?: number
+  skippedFiles?: number
 }
 
 interface DownloadOptions {
@@ -57,11 +60,10 @@ export function useDownloadAllSkins() {
         failedSkins: progressData.failedFiles || [],
         isRunning: progressData.phase !== 'completed',
         isPaused: false,
-        // Additional fields for UI
         phase: progressData.phase,
         overallProgress: progressData.overallProgress,
         skippedFiles: progressData.skippedFiles
-      } as DownloadProgress & { phase?: string; overallProgress?: number; skippedFiles?: number }
+      }
 
       setProgress(convertedProgress)
     })

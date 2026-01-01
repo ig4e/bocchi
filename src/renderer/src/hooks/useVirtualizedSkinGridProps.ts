@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 import type { Skin, Champion } from '../App'
+import type { SelectedSkin } from '../store/atoms'
+import type { DownloadedSkin } from '../store/atoms/skin.atoms'
 
 interface DisplaySkin {
   champion: Champion
@@ -9,8 +11,8 @@ interface DisplaySkin {
 interface VirtualizedSkinGridProps {
   skins: DisplaySkin[]
   viewMode: string
-  downloadedSkins: any[]
-  selectedSkins: any[]
+  downloadedSkins: DownloadedSkin[]
+  selectedSkins: SelectedSkin[]
   favorites: Set<string>
   loading: boolean
   containerWidth: number

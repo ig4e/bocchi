@@ -21,7 +21,13 @@ interface SkinSelectorProps {
   championKey: string
   championName: string
   skins: Skin[]
-  onSelect: (skin: any) => void
+  onSelect: (skin: {
+    championKey: string
+    championName: string
+    skinId: string
+    skinName: string
+    skinNum: number
+  }) => void
   onClose: () => void
 }
 

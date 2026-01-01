@@ -1651,9 +1651,33 @@ function setupIpcHandlers(): void {
     }
   })
 
-  ipcMain.handle('download-tools', async (event) => {
+  ipcMain.handle('get-cslol-tools-version', async () => {
     try {
-      await toolsDownloader.downloadAndExtractTools((progress, details) => {
+      const version = await toolsDownloader.getCslolToolsVersion()
+      return { success: true, version }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get version'
+      }
+    }
+  })
+
+  ipcMain.handle('set-cslol-tools-version', async (_, version: string) => {
+    try {
+      await toolsDownloader.setCslolToolsVersion(version)
+      return { success: true }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to set version'
+      }
+    }
+  })
+
+  ipcMain.handle('download-tools', async (event, version?: string) => {
+    try {
+      await toolsDownloader.downloadAndExtractTools(version, (progress, details) => {
         event.sender.send('tools-download-progress', progress)
         if (details) {
           event.sender.send('tools-download-details', details)
@@ -1671,9 +1695,9 @@ function setupIpcHandlers(): void {
     }
   })
 
-  ipcMain.handle('get-tools-info', async () => {
+  ipcMain.handle('get-tools-info', async (_event, version?: string) => {
     try {
-      const info = await toolsDownloader.getLatestReleaseInfo()
+      const info = await toolsDownloader.getReleaseInfo(version)
       return { success: true, ...info }
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
@@ -2242,7 +2266,7 @@ function setupIpcHandlers(): void {
         // Download tools automatically with progress reporting
         sendStatus('Downloading cslol-tools (mod-tools.exe) for mod extraction...')
         try {
-          await toolsDownloader.downloadAndExtractTools((progress, details) => {
+          await toolsDownloader.downloadAndExtractTools(undefined, (progress, details) => {
             // Send progress to renderer
             event.sender.send('tools-download-progress', progress)
             if (details) {

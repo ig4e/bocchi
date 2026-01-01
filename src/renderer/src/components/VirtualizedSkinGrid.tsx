@@ -3,6 +3,7 @@ import { FixedSizeGrid as Grid } from 'react-window'
 import { useTranslation } from 'react-i18next'
 import type { Champion, Skin } from '../App'
 import type { SelectedSkin } from '../store/atoms'
+import type { DownloadedSkin } from '../store/atoms/skin.atoms'
 import { isOldFormatCustomId } from '../utils/customModId'
 import { ChromaColorPie } from './ChromaColorPie'
 import { ChromaSelectionDialog } from './ChromaSelectionDialog'
@@ -13,7 +14,7 @@ import { generateSkinFilename } from '../../../shared/utils/skinFilename'
 interface VirtualizedSkinGridProps {
   skins: Array<{ champion: Champion; skin: Skin }>
   viewMode: 'compact' | 'comfortable' | 'spacious' | 'list'
-  downloadedSkins: Array<{ championName: string; skinName: string; localPath?: string }>
+  downloadedSkins: DownloadedSkin[]
   selectedSkins: SelectedSkin[]
   favorites: Set<string>
   loading: boolean

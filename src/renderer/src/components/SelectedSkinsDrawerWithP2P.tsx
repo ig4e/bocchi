@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
 import { useTranslation } from 'react-i18next'
-import { selectedSkinsAtom, selectedSkinsDrawerExpandedAtom, p2pRoomAtom } from '../store/atoms'
+import {
+  selectedSkinsAtom,
+  selectedSkinsDrawerExpandedAtom,
+  p2pRoomAtom,
+  isSameSkin
+} from '../store/atoms'
 import type { SelectedSkin, AutoSyncedSkin } from '../store/atoms'
 import type { P2PRoomMember } from '../../../main/types'
+import type { ImportProgress } from '../../../main/types/preload.types'
 import { p2pService } from '../services/p2pService'
 import { p2pFileTransferService } from '../services/p2pFileTransferService'
 import { Badge } from './ui/badge'
-import { useSmartSkinApply } from '../hooks/useSmartSkinApply'
+import { useSmartSkinApply, SmartApplySummary } from '../hooks/useSmartSkinApply'
 import { generateSkinFilename } from '../../../shared/utils/skinFilename'
 import { SavePresetDialog } from './SavePresetDialog'
 import { presetService } from '../services/presetService'
@@ -115,7 +121,7 @@ export const SelectedSkinsDrawer: React.FC<SelectedSkinsDrawerProps> = ({
   const [customImages, setCustomImages] = useState<Record<string, string>>({})
   const [p2pRoom] = useAtom(p2pRoomAtom)
   const [activeTab, setActiveTab] = useState<'my-skins' | 'room-skins'>('my-skins')
-  const [smartApplySummary, setSmartApplySummary] = useState<any>(null)
+  const [smartApplySummary, setSmartApplySummary] = useState<SmartApplySummary | null>(null)
   const [showSavePresetDialog, setShowSavePresetDialog] = useState(false)
   const [, setPresets] = useAtom(presetsAtom)
   const [, setShowPresetsDialog] = useAtom(presetDialogOpenAtom)
@@ -213,11 +219,13 @@ export const SelectedSkinsDrawer: React.FC<SelectedSkinsDrawerProps> = ({
     })
 
     // Listen for import progress updates
-    const unsubscribeProgress = window.api.onImportProgress((data: any) => {
+    const unsubscribeProgress = window.api.onImportProgress((data: ImportProgress) => {
+      const current = data.current || 0
+      const total = data.total || 1
       setPatcherPhase({
         phase: 'importing',
-        progress: (data.current / data.total) * 100,
-        detail: `Importing ${data.name} (${data.current}/${data.total})`
+        progress: (current / total) * 100,
+        detail: `Importing ${data.currentFile || ''} (${current}/${total})`
       })
     })
 
@@ -499,14 +507,7 @@ export const SelectedSkinsDrawer: React.FC<SelectedSkinsDrawerProps> = ({
 
   const applySkinFromPeer = async (skin: ExtendedSelectedSkin, peerId: string) => {
     // Check if skin is already selected
-    const isAlreadySelected = selectedSkins.some(
-      (s) =>
-        s.championKey === skin.championKey &&
-        s.skinId === skin.skinId &&
-        s.chromaId === skin.chromaId
-    )
-
-    if (isAlreadySelected) return
+    if (selectedSkins.some((s) => isSameSkin(s, skin))) return
 
     // Check if this is a custom skin that needs file transfer
     const isCustomMod = skin.championKey === 'Custom' || skin.skinId.startsWith('custom_[User] ')
@@ -540,7 +541,7 @@ export const SelectedSkinsDrawer: React.FC<SelectedSkinsDrawerProps> = ({
     }
 
     // Add skin to selection (either it's not custom or we already have it)
-    setSelectedSkins((prev) => [...prev, skin])
+    setSelectedSkins((prev) => [...prev, { ...skin, source: 'p2p' }])
   }
 
   const applyAllPeerSkins = async (member: ExtendedMember) => {
@@ -1126,7 +1127,7 @@ export const SelectedSkinsDrawer: React.FC<SelectedSkinsDrawerProps> = ({
                                   </p>
                                   {'fromPeerName' in skin && (
                                     <p className="text-[10px] text-text-secondary truncate">
-                                      from {(skin as any).fromPeerName}
+                                      from {(skin as AutoSyncedSkin).fromPeerName}
                                     </p>
                                   )}
                                 </div>

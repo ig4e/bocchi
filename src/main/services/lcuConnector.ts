@@ -4,7 +4,7 @@ import * as path from 'path'
 import * as https from 'https'
 import WebSocket from 'ws'
 import { app } from 'electron'
-import axios from 'axios'
+import axios, { AxiosInstance } from 'axios'
 import { exec } from 'child_process'
 import { promisify } from 'util'
 import { GamePathService } from './gamePathService'
@@ -28,7 +28,7 @@ export class LCUConnector extends EventEmitter {
   private connected: boolean = false
   private pollInterval: NodeJS.Timeout | null = null
   private subscriptions: Set<string> = new Set()
-  private axiosInstance: any = null
+  private axiosInstance: AxiosInstance | null = null
   private cachedLockfilePath: string | null = null
   private lockfileCacheExpiry: number = 0
   private readonly lockfileCacheDuration = 30000 // 30 seconds
@@ -137,7 +137,7 @@ export class LCUConnector extends EventEmitter {
     return true
   }
 
-  async request(method: string, endpoint: string, data?: any): Promise<any> {
+  async request(method: string, endpoint: string, data?: unknown): Promise<any> {
     if (!this.axiosInstance) {
       throw new Error('Not connected to LCU')
     }
@@ -149,8 +149,8 @@ export class LCUConnector extends EventEmitter {
         data
       })
       return response.data
-    } catch (error: any) {
-      if (error.response) {
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
         // Suppress 404 errors for champ-select endpoint as they're expected when not in champ select
         const isChampSelectEndpoint = endpoint.includes('/lol-champ-select/')
         const is404Error = error.response.status === 404
@@ -160,14 +160,17 @@ export class LCUConnector extends EventEmitter {
         }
 
         // Include httpStatus in the error for easier handling
-        const err: any = new Error(`LCU request failed: ${error.response.status}`)
+        const err = new Error(`LCU request failed: ${error.response.status}`) as Error & {
+          httpStatus: number
+        }
         err.httpStatus = error.response.status
         throw err
-      } else if (error.request) {
+      } else if (axios.isAxiosError(error) && error.request) {
         console.error('LCU: No response from server:', error.message)
         throw new Error('No response from League client')
       } else {
-        console.error('LCU: Request setup error:', error.message)
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        console.error('LCU: Request setup error:', message)
         throw error
       }
     }

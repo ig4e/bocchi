@@ -37,7 +37,7 @@ export class PresetServiceClient {
     }
 
     // Parse dates from JSON
-    return result.data.map((preset: any) => ({
+    return result.data.map((preset: Preset) => ({
       ...preset,
       createdAt: new Date(preset.createdAt),
       updatedAt: new Date(preset.updatedAt)

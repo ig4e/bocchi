@@ -49,7 +49,7 @@ const VirtualizedChampionListComponent = forwardRef<
     const { groupedChampions, letterIndices, availableLetters } = React.useMemo(() => {
       const items: Array<{
         type: 'all' | 'custom' | 'divider' | 'letter' | 'champion'
-        data?: any
+        data?: Champion | string
       }> = []
       const indices: Record<string, number> = {}
       const letters = new Set<string>()
@@ -128,40 +128,44 @@ const VirtualizedChampionListComponent = forwardRef<
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div
-                          className={`flex items-center justify-center px-3 py-3 cursor-pointer transition-all duration-200 mx-2 my-1 rounded-lg border-2
+                          className={`flex items-center justify-center px-3 py-3 cursor-pointer transition-all duration-300 mx-2 my-1 rounded-xl border
                         ${
                           selectedChampion === null && selectedChampionKey === 'all'
-                            ? 'bg-primary-500 text-white shadow-md dark:shadow-dark-soft border-primary-600 scale-[1.02]'
-                            : 'hover:bg-secondary-100 dark:hover:bg-secondary-800 text-text-primary border-transparent hover:border-border'
+                            ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30 border-primary-400 scale-[1.05]'
+                            : 'hover:bg-primary-500/10 text-text-primary border-transparent hover:border-primary-500/30'
                         }`}
                           onClick={() => onChampionSelect(null, 'all')}
                         >
-                          <div className="w-10 h-10 rounded-lg bg-secondary-200 dark:bg-secondary-700 flex items-center justify-center">
-                            <span className="text-lg font-bold">A</span>
+                          <div className="w-10 h-10 rounded-lg bg-primary-500/10 flex items-center justify-center">
+                            <span className="text-lg font-bold text-primary-500">A</span>
                           </div>
                         </div>
                       </TooltipTrigger>
                       <TooltipPortal>
-                        <TooltipContent side="right" sideOffset={5}>
-                          <p>{t('champion.allChampions')}</p>
+                        <TooltipContent side="right" sideOffset={5} className="bg-surface/90 backdrop-blur-md border-border/50">
+                          <p className="font-semibold">{t('champion.allChampions')}</p>
                         </TooltipContent>
                       </TooltipPortal>
                     </Tooltip>
                   </TooltipProvider>
                 ) : (
                   <div
-                    className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition-all duration-200 mx-3 my-1 rounded-lg border-2
+                    className={`flex items-center gap-3 px-5 py-3 cursor-pointer transition-all duration-300 mx-3 my-1 rounded-xl border
                   ${
                     selectedChampion === null && selectedChampionKey === 'all'
-                      ? 'bg-primary-500 text-white shadow-md dark:shadow-dark-soft border-primary-600 scale-[1.02]'
-                      : 'hover:bg-secondary-100 dark:hover:bg-secondary-800 text-text-primary border-transparent hover:border-border'
+                      ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30 border-primary-400 scale-[1.02]'
+                      : 'hover:bg-primary-500/10 text-text-primary border-transparent hover:border-primary-500/30'
                   }`}
                     onClick={() => onChampionSelect(null, 'all')}
                   >
-                    <div className="w-10 h-10 rounded-lg bg-secondary-200 dark:bg-secondary-700 flex items-center justify-center">
-                      <span className="text-lg font-bold">A</span>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      selectedChampion === null && selectedChampionKey === 'all' ? 'bg-white/20' : 'bg-primary-500/10'
+                    }`}>
+                      <span className={`text-lg font-bold ${
+                        selectedChampion === null && selectedChampionKey === 'all' ? 'text-white' : 'text-primary-500'
+                      }`}>A</span>
                     </div>
-                    <span className="text-sm font-medium">{t('champion.allChampions')}</span>
+                    <span className="text-sm font-bold">{t('champion.allChampions')}</span>
                   </div>
                 )}
               </div>
@@ -175,40 +179,44 @@ const VirtualizedChampionListComponent = forwardRef<
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div
-                          className={`flex items-center justify-center px-3 py-3 cursor-pointer transition-all duration-200 mx-2 my-1 rounded-lg border-2
+                          className={`flex items-center justify-center px-3 py-3 cursor-pointer transition-all duration-300 mx-2 my-1 rounded-xl border
                         ${
                           selectedChampion === null && selectedChampionKey === 'custom'
-                            ? 'bg-primary-500 text-white shadow-md dark:shadow-dark-soft border-primary-600 scale-[1.02]'
-                            : 'hover:bg-secondary-100 dark:hover:bg-secondary-800 text-text-primary border-transparent hover:border-border'
+                            ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30 border-primary-400 scale-[1.05]'
+                            : 'hover:bg-primary-500/10 text-text-primary border-transparent hover:border-primary-500/30'
                         }`}
                           onClick={() => onChampionSelect(null, 'custom')}
                         >
-                          <div className="w-10 h-10 rounded-lg bg-secondary-200 dark:bg-secondary-700 flex items-center justify-center">
-                            <span className="text-lg font-bold">C</span>
+                          <div className="w-10 h-10 rounded-lg bg-primary-500/10 flex items-center justify-center">
+                            <span className="text-lg font-bold text-primary-500">C</span>
                           </div>
                         </div>
                       </TooltipTrigger>
                       <TooltipPortal>
-                        <TooltipContent side="right" sideOffset={5}>
-                          <p>{t('champion.customMods')}</p>
+                        <TooltipContent side="right" sideOffset={5} className="bg-surface/90 backdrop-blur-md border-border/50">
+                          <p className="font-semibold">{t('champion.customMods')}</p>
                         </TooltipContent>
                       </TooltipPortal>
                     </Tooltip>
                   </TooltipProvider>
                 ) : (
                   <div
-                    className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition-all duration-200 mx-3 my-1 rounded-lg border-2
+                    className={`flex items-center gap-3 px-5 py-3 cursor-pointer transition-all duration-300 mx-3 my-1 rounded-xl border
                   ${
                     selectedChampion === null && selectedChampionKey === 'custom'
-                      ? 'bg-primary-500 text-white shadow-md dark:shadow-dark-soft border-primary-600 scale-[1.02]'
-                      : 'hover:bg-secondary-100 dark:hover:bg-secondary-800 text-text-primary border-transparent hover:border-border'
+                      ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30 border-primary-400 scale-[1.02]'
+                      : 'hover:bg-primary-500/10 text-text-primary border-transparent hover:border-primary-500/30'
                   }`}
                     onClick={() => onChampionSelect(null, 'custom')}
                   >
-                    <div className="w-10 h-10 rounded-lg bg-secondary-200 dark:bg-secondary-700 flex items-center justify-center">
-                      <span className="text-lg font-bold">C</span>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      selectedChampion === null && selectedChampionKey === 'custom' ? 'bg-white/20' : 'bg-primary-500/10'
+                    }`}>
+                      <span className={`text-lg font-bold ${
+                        selectedChampion === null && selectedChampionKey === 'custom' ? 'text-white' : 'text-primary-500'
+                      }`}>C</span>
                     </div>
-                    <span className="text-sm font-medium">{t('champion.customMods')}</span>
+                    <span className="text-sm font-bold">{t('champion.customMods')}</span>
                   </div>
                 )}
               </div>
@@ -225,7 +233,7 @@ const VirtualizedChampionListComponent = forwardRef<
             return (
               <div style={style}>
                 <div className="px-6 py-3 text-xs font-bold text-text-secondary uppercase tracking-wider">
-                  {item.data}
+                  {item.data as string}
                 </div>
               </div>
             )
@@ -239,47 +247,54 @@ const VirtualizedChampionListComponent = forwardRef<
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div
-                          className={`flex items-center justify-center px-3 py-3 cursor-pointer transition-all duration-200 mx-2 my-1 rounded-lg border-2
+                          className={`flex items-center justify-center px-3 py-3 cursor-pointer transition-all duration-300 mx-2 my-1 rounded-xl border
                         ${
                           selectedChampion?.key === champion.key
-                            ? 'bg-primary-500 text-white shadow-md dark:shadow-dark-soft border-primary-600 scale-[1.02]'
-                            : 'hover:bg-secondary-100 dark:hover:bg-secondary-800 text-text-primary border-transparent hover:border-border'
+                            ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30 border-primary-400 scale-[1.05]'
+                            : 'hover:bg-primary-500/10 text-text-primary border-transparent hover:border-primary-500/30'
                         }`}
                           onClick={() => onChampionSelect(champion, champion.key)}
                         >
                           <img
                             src={champion.image}
                             alt={getChampionDisplayName(champion)}
-                            className="w-10 h-10 rounded-lg object-cover"
+                            className="w-10 h-10 rounded-lg object-cover shadow-sm"
                             loading="lazy"
                           />
                         </div>
                       </TooltipTrigger>
                       <TooltipPortal>
-                        <TooltipContent side="right" sideOffset={5}>
-                          <p className="font-medium">{champion.name}</p>
-                          <p className="text-xs text-muted-foreground">{champion.title}</p>
+                        <TooltipContent side="right" sideOffset={5} className="bg-surface/90 backdrop-blur-md border-border/50">
+                          <p className="font-bold">{champion.name}</p>
+                          <p className="text-[10px] text-text-muted uppercase tracking-wider">{champion.title}</p>
                         </TooltipContent>
                       </TooltipPortal>
                     </Tooltip>
                   </TooltipProvider>
                 ) : (
                   <div
-                    className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition-all duration-200 mx-3 my-1 rounded-lg border-2
+                    className={`flex items-center gap-3 px-5 py-3 cursor-pointer transition-all duration-300 mx-3 my-1 rounded-xl border
                   ${
                     selectedChampion?.key === champion.key
-                      ? 'bg-primary-500 text-white shadow-md dark:shadow-dark-soft border-primary-600 scale-[1.02]'
-                      : 'hover:bg-secondary-100 dark:hover:bg-secondary-800 text-text-primary border-transparent hover:border-border'
+                      ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30 border-primary-400 scale-[1.02]'
+                      : 'hover:bg-primary-500/10 text-text-primary border-transparent hover:border-primary-500/30'
                   }`}
                     onClick={() => onChampionSelect(champion, champion.key)}
                   >
                     <img
                       src={champion.image}
                       alt={getChampionDisplayName(champion)}
-                      className="w-10 h-10 rounded-lg"
+                      className="w-10 h-10 rounded-lg shadow-md"
                       loading="lazy"
                     />
-                    <span className="text-sm font-medium">{champion.name}</span>
+                    <div className="flex flex-col overflow-hidden">
+                      <span className="text-sm font-bold truncate">{champion.name}</span>
+                      <span className={`text-[10px] uppercase tracking-wider font-bold truncate ${
+                        selectedChampion?.key === champion.key ? 'text-white/70' : 'text-text-muted'
+                      }`}>
+                        {champion.title}
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>

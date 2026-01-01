@@ -2,6 +2,7 @@ import { FileImage, Image, Loader2, Upload, X } from 'lucide-react'
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Champion } from '../App'
+import type { ImportOptions } from '../../../main/types/preload.types'
 import { useToolsManagement } from '../hooks/useToolsManagement'
 import { detectChampionFromText, getChampionDisplayName } from '../utils/championUtils'
 import { ImportMethodDialog } from './ImportMethodDialog'
@@ -130,7 +131,7 @@ export const FileUploadButton = forwardRef<FileUploadButtonRef, FileUploadButton
             }
 
             // Try to extract mod info for better champion detection
-            const importOptions: any = {}
+            const importOptions: ImportOptions = {}
             try {
               const modInfo = await window.api.extractModInfo(filePath)
               if (modInfo.success && modInfo.info) {

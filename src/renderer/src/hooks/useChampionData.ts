@@ -5,7 +5,8 @@ import { useLocale } from '../contexts/useLocale'
 import {
   championDataAtom,
   selectedChampionAtom,
-  showChampionDataUpdateAtom
+  showChampionDataUpdateAtom,
+  ChampionData
 } from '../store/atoms/champion.atoms'
 import {
   statusMessageAtom,
@@ -30,18 +31,14 @@ export function useChampionData() {
       const result = await window.api.loadChampionData(currentLanguage)
       if (result.success && result.data) {
         // Cast the data to ChampionData type
-        const championData = result.data as unknown as {
-          version: string
-          lastUpdated: string
-          champions: Array<{ key: string; [key: string]: unknown }>
-        }
-        setChampionData(championData as any)
+        const championData = result.data as unknown as ChampionData
+        setChampionData(championData)
 
         // Try to restore selected champion from persisted key
         if (selectedChampionKey && selectedChampionKey !== 'all') {
           const champion = championData.champions.find((c) => c.key === selectedChampionKey)
           if (champion) {
-            setSelectedChampion(champion as any)
+            setSelectedChampion(champion)
           }
         } else if (selectedChampionKey === 'all') {
           setSelectedChampion(null)
@@ -51,11 +48,11 @@ export function useChampionData() {
         if (preserveSelection && selectedChampion) {
           const sameChampion = championData.champions.find((c) => c.key === selectedChampion.key)
           if (sameChampion) {
-            setSelectedChampion(sameChampion as any)
+            setSelectedChampion(sameChampion)
           }
         }
 
-        return championData as any
+        return championData
       }
       return null
     },

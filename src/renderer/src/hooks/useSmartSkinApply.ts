@@ -10,6 +10,7 @@ import {
 } from '../store/atoms/settings.atoms'
 import { currentQueueIdAtom } from '../store/atoms/lcu.atoms'
 import { PRESELECT_CHAMPION_QUEUE_IDS } from '../constants/queues'
+import type { PreselectChampion, PreselectSnapshot } from '../../../main/types/preload.types'
 
 interface TeamComposition {
   championIds: number[]
@@ -18,7 +19,7 @@ interface TeamComposition {
   updateKey?: number
 }
 
-interface SmartApplySummary {
+export interface SmartApplySummary {
   totalSelected: number
   willApply: number
   teamChampions: string[]
@@ -182,35 +183,37 @@ export function useSmartSkinApply({
     })
 
     // Listen for preselect mode events
-    const unsubscribePreselectReady = window.api.onPreselectReadyForApply(async (snapshot) => {
-      // Check if patcher is already running
-      const isPatcherRunning = await window.api.isPatcherRunning()
-      if (isPatcherRunning) return
+    const unsubscribePreselectReady = window.api.onPreselectReadyForApply(
+      async (snapshot: PreselectSnapshot) => {
+        // Check if patcher is already running
+        const isPatcherRunning = await window.api.isPatcherRunning()
+        if (isPatcherRunning) return
 
-      if (!autoApplyEnabled || !gamePath || isApplying) return
+        if (!autoApplyEnabled || !gamePath || isApplying) return
 
-      const championIds = snapshot.champions
-        .map((champ: any) => champ.championId)
-        .filter((id: number) => id > 0)
+        const championIds = snapshot.champions
+          .map((champ: PreselectChampion) => champ.championId)
+          .filter((id: number) => id > 0)
 
-      // Create a unique key for this team composition from snapshot
-      const teamKey = championIds.sort().join('-')
+        // Create a unique key for this team composition from snapshot
+        const teamKey = championIds.sort().join('-')
 
-      // Don't apply if we already applied for this exact team
-      if (teamKey === lastAppliedTeamKey.current) return
+        // Don't apply if we already applied for this exact team
+        if (teamKey === lastAppliedTeamKey.current) return
 
-      // Check if we have any skins selected at all
-      if (selectedSkins.length === 0) return
+        // Check if we have any skins selected at all
+        if (selectedSkins.length === 0) return
 
-      console.log('[useSmartSkinApply] Triggering Swiftplay auto-apply:', championIds)
-      toast.success(
-        t('smartApply.preselect.applying', { default: 'Applying skins for Swiftplay...' })
-      )
+        console.log('[useSmartSkinApply] Triggering Swiftplay auto-apply:', championIds)
+        toast.success(
+          t('smartApply.preselect.applying', { default: 'Applying skins for Swiftplay...' })
+        )
 
-      // Apply the skins using parent function with champion IDs for smart filtering
-      parentApplyFunction?.(championIds)
-      lastAppliedTeamKey.current = teamKey
-    })
+        // Apply the skins using parent function with champion IDs for smart filtering
+        parentApplyFunction?.(championIds)
+        lastAppliedTeamKey.current = teamKey
+      }
+    )
 
     const unsubscribePreselectModeDetected = window.api.onPreselectModeDetected((data) => {
       console.log('[useSmartSkinApply] Preselect mode detected:', data)
@@ -222,15 +225,15 @@ export function useSmartSkinApply({
     })
 
     const unsubscribePreselectChampionsChanged = window.api.onPreselectChampionsChanged(
-      (champions) => {
+      (champions: PreselectChampion[]) => {
         console.log(
           '[useSmartSkinApply] Preselect champions changed:',
-          champions.map((c: any) => c.championId)
+          champions.map((c: PreselectChampion) => c.championId)
         )
 
         // Update team composition with preselect champions
         const championIds = champions
-          .map((champ: any) => champ.championId)
+          .map((champ: PreselectChampion) => champ.championId)
           .filter((id: number) => id > 0)
 
         if (championIds.length > 0) {

@@ -6,6 +6,15 @@ export interface DownloadedSkin {
   url: string
   localPath?: string
   author?: string // Author for custom/user mods
+  source?: 'repository' | 'user' | 'p2p'
+  metadata?: {
+    commitSha: string
+    downloadedAt: Date
+    lastUpdateCheck?: Date
+    fileSize?: number
+    githubPath?: string
+    version?: number
+  }
 }
 
 // Downloaded skins atom

@@ -38,7 +38,25 @@ export interface SelectedSkin {
   variantId?: string
   isDownloaded?: boolean
   isAutoSelected?: boolean
+  isCustom?: boolean // Whether it's a custom mod
+  localPath?: string // Local path for custom mods
   downloadedFilename?: string // Stores the actual filename used when downloading
+  source?: 'repository' | 'user' | 'p2p' | 'overlay' | 'auto' // Source of the skin
+}
+
+/**
+ * Checks if two skins are the same based on their source and identifier
+ */
+export const isSameSkin = (a: Partial<SelectedSkin>, b: Partial<SelectedSkin>) => {
+  // If both have sources, they must match
+  if (a.source && b.source && a.source !== b.source) return false
+
+  return (
+    a.championKey === b.championKey &&
+    a.skinId === b.skinId &&
+    (a.chromaId || undefined) === (b.chromaId || undefined) &&
+    (a.variantId || undefined) === (b.variantId || undefined)
+  )
 }
 
 // Auto-synced skin from P2P room member

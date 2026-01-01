@@ -233,14 +233,16 @@ export interface IApi {
     latestVersion?: string | null
     error?: string
   }>
-  downloadTools: (attempt?: number) => Promise<{
+  getCslolToolsVersion: () => Promise<{ success: boolean; version?: string | null; error?: string }>
+  setCslolToolsVersion: (version: string) => Promise<{ success: boolean; error?: string }>
+  downloadTools: (version?: string) => Promise<{
     success: boolean
     error?: string
     errorType?: 'network' | 'github' | 'filesystem' | 'extraction' | 'validation' | 'unknown'
     errorDetails?: string
     canRetry?: boolean
   }>
-  getToolsInfo: () => Promise<{
+  getToolsInfo: (version?: string) => Promise<{
     success: boolean
     downloadUrl?: string
     version?: string
@@ -409,9 +411,7 @@ export interface IApi {
   onPatcherStatus: (callback: (status: string) => void) => () => void
   onPatcherMessage: (callback: (message: string) => void) => () => void
   onPatcherError: (callback: (error: string) => void) => () => void
-  onImportProgress: (
-    callback: (data: { current: number; total: number; name: string; phase: string }) => void
-  ) => () => void
+  onImportProgress: (callback: (data: ImportProgress) => void) => () => void
 
   openExternal: (url: string) => Promise<{ success: boolean; error?: string }>
 

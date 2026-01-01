@@ -9,7 +9,7 @@ export class P2PService {
   private room: P2PRoom | null = null
   private connections: Map<string, DataConnection> = new Map()
   private isHost: boolean = false
-  private eventCallbacks: Map<string, ((data: any) => void)[]> = new Map()
+  private eventCallbacks: Map<string, ((data: unknown) => void)[]> = new Map()
   private connectionAttempts: number = 0
   private maxRetries: number = 3
   private retryTimeout: NodeJS.Timeout | null = null
@@ -25,7 +25,7 @@ export class P2PService {
     return result
   }
 
-  private emit(event: string, data: any) {
+  private emit(event: string, data: unknown) {
     const callbacks = this.eventCallbacks.get(event) || []
     callbacks.forEach((cb) => cb(data))
   }

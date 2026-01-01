@@ -1,16 +1,17 @@
 import React, { createContext, useContext, useEffect } from 'react'
 import { useAtom } from 'jotai'
-import { p2pRoomAtom, p2pConnectionStatusAtom } from '../store/atoms'
+import { p2pRoomAtom, p2pConnectionStatusAtom, type SelectedSkin } from '../store/atoms'
 import { p2pService } from '../services/p2pService'
-import type { P2PRoom } from '../../../main/types'
+import type { P2PRoom, P2PRoomMember } from '../../../main/types'
+import type { DownloadedSkin } from '../store/atoms/skin.atoms'
 
 interface P2PContextValue {
   createRoom: (displayName: string) => Promise<string>
   joinRoom: (roomId: string, displayName: string) => Promise<void>
   leaveRoom: () => Promise<void>
   broadcastSkins: (
-    skins: any[],
-    downloadedSkins: Array<{ championName: string; skinName: string; localPath?: string }>
+    skins: SelectedSkin[],
+    downloadedSkins: DownloadedSkin[]
   ) => void
   broadcastChampion: (champion: {
     id: number
@@ -37,7 +38,7 @@ export const P2PProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setConnectionStatus(status as any)
     })
 
-    const unsubMemberJoined = p2pService.on('member-joined', (member: any) => {
+    const unsubMemberJoined = p2pService.on('member-joined', (member: P2PRoomMember) => {
       console.log('Member joined:', member.name)
     })
 
@@ -64,8 +65,8 @@ export const P2PProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await p2pService.leaveRoom()
     },
     broadcastSkins: (
-      skins: any[],
-      downloadedSkins: Array<{ championName: string; skinName: string; localPath?: string }>
+      skins: SelectedSkin[],
+      downloadedSkins: DownloadedSkin[]
     ) => {
       p2pService.broadcastActiveSkins(skins, downloadedSkins)
     },

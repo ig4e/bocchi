@@ -7,7 +7,7 @@ import { GridViewToggle } from '../GridViewToggle'
 import { FileUploadButton } from '../FileUploadButton'
 import { DownloadAllSkinsDialog } from '../DownloadAllSkinsDialog'
 import { DownloadAllSkinsOptionsDialog } from '../DownloadAllSkinsOptionsDialog'
-import { filtersAtom, skinSearchQueryAtom, viewModeAtom } from '../../store/atoms'
+import { filtersAtom, skinSearchQueryAtom, viewModeAtom, type SelectedSkin } from '../../store/atoms'
 import { showDownloadedSkinsDialogAtom } from '../../store/atoms/ui.atoms'
 import {
   useDisplaySkins,
@@ -21,13 +21,14 @@ import { useChampionData } from '../../hooks/useChampionData'
 import { useSkinManagement } from '../../hooks/useSkinManagement'
 import { useDownloadAllSkins } from '../../hooks/useDownloadAllSkins'
 import type { Champion, Skin } from '../../App'
+import type { FileUploadButtonRef } from '../FileUploadButton'
 
 interface SkinBrowserSectionProps {
   loading: boolean
   onEditCustomSkin: (skinPath: string, currentName: string) => Promise<void>
   onSkinClick: (champion: Champion, skin: Skin, chromaId?: string) => void
-  selectedSkins: any[]
-  fileUploadRef: React.MutableRefObject<any>
+  selectedSkins: SelectedSkin[]
+  fileUploadRef: React.RefObject<FileUploadButtonRef | null>
 }
 
 export function SkinBrowserSection({

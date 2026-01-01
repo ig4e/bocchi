@@ -153,8 +153,10 @@ const api = {
   // Tools management
   checkToolsExist: () => ipcRenderer.invoke('check-tools-exist'),
   checkCslolToolsUpdate: () => ipcRenderer.invoke('check-cslol-tools-update'),
-  downloadTools: (attempt?: number) => ipcRenderer.invoke('download-tools', attempt),
-  getToolsInfo: () => ipcRenderer.invoke('get-tools-info'),
+  getCslolToolsVersion: () => ipcRenderer.invoke('get-cslol-tools-version'),
+  setCslolToolsVersion: (version: string) => ipcRenderer.invoke('set-cslol-tools-version', version),
+  downloadTools: (version?: string) => ipcRenderer.invoke('download-tools', version),
+  getToolsInfo: (version?: string) => ipcRenderer.invoke('get-tools-info', version),
   onToolsDownloadProgress: (callback: (progress: number) => void) => {
     const handler = (_: IpcRendererEvent, progress: number) => callback(progress)
     ipcRenderer.on('tools-download-progress', handler)

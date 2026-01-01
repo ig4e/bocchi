@@ -37,7 +37,7 @@ export function useToolsManagement() {
       const currentAttempt = isRetry ? downloadAttempts + 1 : 1
       setDownloadAttempts(currentAttempt)
 
-      const result = await window.api.downloadTools(currentAttempt)
+      const result = await window.api.downloadTools()
       if (result.success) {
         setToolsExist(true)
         setStatusMessage(t('status.toolsDownloaded'))

@@ -4,22 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
 import { Progress } from './ui/progress'
 import { Pause, Play, X, AlertCircle, CheckCircle2 } from 'lucide-react'
-
-interface DownloadProgress {
-  totalSkins: number
-  completedSkins: number
-  currentSkin: string | null
-  currentProgress: number
-  downloadSpeed: number
-  timeRemaining: number
-  failedSkins: string[]
-  isRunning: boolean
-  isPaused: boolean
-  // New fields for bulk download
-  phase?: 'downloading' | 'extracting' | 'processing' | 'completed'
-  overallProgress?: number
-  skippedFiles?: number
-}
+import type { DownloadProgress } from '../hooks/useDownloadAllSkins'
 
 interface DownloadAllSkinsDialogProps {
   isOpen: boolean
