@@ -1,3 +1,19 @@
+# v13.0.1
+
+## Added
+- New CSLoL management tab in settings for advanced mod configuration
+- Support for multiple skins per champion selection
+- Auto-fix mod issues setting
+- Cache management tools in settings (view size and clear cache)
+- Duplicate skin prevention logic
+
+## Improved
+- Complete UI refresh with modern glassmorphism aesthetic
+- Enhanced champion list with better grouping and romanized search
+- Modernized skin browser with improved card designs and hover effects
+- Systematic removal of `any` types for 100% TypeScript safety
+- Improved IPC bridge with strict typing
+
 # v13.0.0
 
 ## Fixed
