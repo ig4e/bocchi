@@ -1,4 +1,4 @@
-# v1.24.11
+# v13.0.0
 
 ## Fixed
 - Replaced node-7z with 7z-wasm for 100% reliable cslol-manager extraction across all user environments
